@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>dmg calc</title>
+    <style>
+        html, body {
+            color: #fff;
+            background-color: rgb(135, 143, 94);
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+        div {
+            font-size: 12px;
+            user-select: none;
+            position: fixed;
+            top: 20px;
+            width: 300px;
+            max-height: 600px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 3px solid #444444;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 10px 10px 8px rgba(0, 0, 0, 0.5);
+            transition: visibility 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+            overflow-y: auto;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div style="left: 20px;">
+        <h1>Attacker</h1>
+        <label>
+            Hat:
+            <select id="hat">
+                <option value="bull">Bull Helmet</option>
+                <option value="spike">Spike Gear</option>
+                <option value="noob">Bloodthirster</option>
+                <option value="none">Other/None</option>
+            </select>
+        </label>
+        <label>
+            Accessory:
+            <select id="accessory">
+                <option value="none">None</option>
+                <option value="corupt">Corrupt X Wings</option>
+                <option value="bruh">Sawblade</option>
+            </select>
+        </label>
+        <label>
+            Primary: ㅤ
+            <select id="primary" style="width: 140px;">
+                <option value="5">Polearm</option>
+                <option value="4">Katana</option>
+                <option value="0">Tool hammer</option>
+                <option value="none">None</option>
+            </select>
+            <select id="primary-variant">
+                <option value="0">None</option>
+                <option value="1">Gold</option>
+                <option value="2">Diamond+</option>
+            </select>
+        </label>
+        <label>
+            Secondary:
+            <select id="secondary">
+                <option value="none">None</option>
+                <option value="15">Musket</option>
+                <option value="12">Crossbow</option>
+                <option value="13">Repeater Crossbow</option>
+                <option value="10">Hunting Bow</option>
+            </select>
+            <select id="secondary-variant">
+                <option value="0">None</option>
+                <option value="1">Gold</option>
+                <option value="2">Diamond+</option>
+            </select>
+        </label>
+        <label>
+            Turret gear
+            <input type="checkbox" id="turretgear">
+        </label>
+        <label>
+            Spike:
+            <select id="spike">
+                <option value="none">None</option>
+                <option value="18">Spinning Spike</option>
+                <option value="17">Greater/Poison Spike</option>
+                <option value="16">Spike</option>
+            </select>
+        </label>
+    </div>
+
+    <div style="left: 370px;">
+        <h1>Enemy</h1>
+        <label>
+            Hat:
+            <select id="enemy-hat">
+                <option value="solider">Soldier Helmet</option>
+                <option value="emp">EMP Helmet</option>
+                <option value="bull">Bull Helmet</option>
+                <option value="noob">Bloodthirster</option>
+                <option value="none">Other/None</option>
+            </select>
+        </label>
+        <label>
+            Primary:
+            <select id="enemy-primary" >
+                <option value="none">None</option>
+                <option value="5">Polearm</option>
+                <option value="4">Katana</option>
+            </select>
+            <select id="enemy-primary-variant">
+                <option value="0">None</option>
+                <option value="1">Gold</option>
+                <option value="2">Diamond+</option>
+            </select>
+        </label>
+    </div>
+
+    <div style="width: 150px; top: 230px; left: 20px;">
+        <h1 id="result"/>
+    </div>
+
+    <script>
+        const weapons = [{
+            id: 0,
+            type: 0,
+            name: "tool hammer",
+            desc: "tool for gathering all resources",
+            src: "hammer_1",
+            length: 140,
+            width: 140,
+            xOff: -3,
+            yOff: 18,
+            dmg: 25,
+            range: 65,
+            gather: 1,
+            speed: 300
+        }, {
+            id: 1,
+            type: 0,
+            age: 2,
+            name: "hand axe",
+            desc: "gathers resources at a higher rate",
+            src: "axe_1",
+            length: 140,
+            width: 140,
+            xOff: 3,
+            yOff: 24,
+            dmg: 30,
+            spdMult: 1,
+            range: 70,
+            gather: 2,
+            speed: 400
+        }, {
+            id: 2,
+            type: 0,
+            age: 8,
+            pre: 1,
+            name: "great axe",
+            desc: "deal more damage and gather more resources",
+            src: "great_axe_1",
+            length: 140,
+            width: 140,
+            xOff: -8,
+            yOff: 25,
+            dmg: 35,
+            spdMult: 1,
+            range: 75,
+            gather: 4,
+            speed: 400
+        }, {
+            id: 3,
+            type: 0,
+            age: 2,
+            name: "short sword",
+            desc: "increased attack power but slower move speed",
+            src: "sword_1",
+            iPad: 1.3,
+            length: 130,
+            width: 210,
+            xOff: -8,
+            yOff: 46,
+            dmg: 35,
+            spdMult: 0.85,
+            range: 110,
+            gather: 1,
+            speed: 300
+        }, {
+            id: 4,
+            type: 0,
+            age: 8,
+            pre: 3,
+            name: "katana",
+            desc: "greater range and damage",
+            src: "samurai_1",
+            iPad: 1.3,
+            length: 130,
+            width: 210,
+            xOff: -8,
+            yOff: 59,
+            dmg: 40,
+            spdMult: 0.8,
+            range: 118,
+            gather: 1,
+            speed: 300
+        }, {
+            id: 5,
+            type: 0,
+            age: 2,
+            name: "polearm",
+            desc: "long range melee weapon",
+            src: "spear_1",
+            iPad: 1.3,
+            length: 130,
+            width: 210,
+            xOff: -8,
+            yOff: 53,
+            dmg: 45,
+            knock: 0.2,
+            spdMult: 0.82,
+            range: 142,
+            gather: 1,
+            speed: 700
+        }, {
+            id: 6,
+            type: 0,
+            age: 2,
+            name: "bat",
+            desc: "fast long range melee weapon",
+            src: "bat_1",
+            iPad: 1.3,
+            length: 110,
+            width: 180,
+            xOff: -8,
+            yOff: 53,
+            dmg: 20,
+            knock: 0.7,
+            range: 110,
+            gather: 1,
+            speed: 300
+        }, {
+            id: 7,
+            type: 0,
+            age: 2,
+            name: "daggers",
+            desc: "really fast short range weapon",
+            src: "dagger_1",
+            iPad: 0.8,
+            length: 110,
+            width: 110,
+            xOff: 18,
+            yOff: 0,
+            dmg: 20,
+            knock: 0.1,
+            range: 65,
+            gather: 1,
+            hitSlow: 0.1,
+            spdMult: 1.13,
+            speed: 100
+        }, {
+            id: 8,
+            type: 0,
+            age: 2,
+            name: "stick",
+            desc: "great for gathering but very weak",
+            src: "stick_1",
+            length: 140,
+            width: 140,
+            xOff: 3,
+            yOff: 24,
+            dmg: 1,
+            spdMult: 1,
+            range: 70,
+            gather: 7,
+            speed: 400
+        }, {
+            id: 9,
+            type: 1,
+            age: 6,
+            name: "hunting bow",
+            desc: "bow used for ranged combat and hunting",
+            src: "bow_1",
+            req: ["wood", 4],
+            length: 120,
+            width: 120,
+            xOff: -6,
+            yOff: 0,
+            Pdmg: 25,
+            projectile: 0,
+            spdMult: 0.75,
+            speed: 600
+        }, {
+            id: 10,
+            type: 1,
+            age: 6,
+            name: "great hammer",
+            desc: "hammer used for destroying structures",
+            src: "great_hammer_1",
+            length: 140,
+            width: 140,
+            xOff: -9,
+            yOff: 25,
+            dmg: 10,
+            Pdmg: 10,
+            spdMult: 0.88,
+            range: 75,
+            sDmg: 7.5,
+            gather: 1,
+            speed: 400
+        }, {
+            id: 11,
+            type: 1,
+            age: 6,
+            name: "wooden shield",
+            desc: "blocks projectiles and reduces melee damage",
+            src: "shield_1",
+            length: 120,
+            width: 120,
+            shield: 0.2,
+            xOff: 6,
+            yOff: 0,
+            Pdmg: 0,
+            spdMult: 0.7
+        }, {
+            id: 12,
+            type: 1,
+            age: 8,
+            pre: 9,
+            name: "crossbow",
+            desc: "deals more damage and has greater range",
+            src: "crossbow_1",
+            req: ["wood", 5],
+            aboveHand: true,
+            armS: 0.75,
+            length: 120,
+            width: 120,
+            xOff: -4,
+            yOff: 0,
+            Pdmg: 35,
+            projectile: 2,
+            spdMult: 0.7,
+            speed: 700
+        }, {
+            id: 13,
+            type: 1,
+            age: 9,
+            pre: 12,
+            name: "repeater crossbow",
+            desc: "high firerate crossbow with reduced damage",
+            src: "crossbow_2",
+            req: ["wood", 10],
+            aboveHand: true,
+            armS: 0.75,
+            length: 120,
+            width: 120,
+            xOff: -4,
+            yOff: 0,
+            Pdmg: 30,
+            projectile: 3,
+            spdMult: 0.7,
+            speed: 230
+        }, {
+            id: 14,
+            type: 1,
+            age: 6,
+            name: "mc grabby",
+            desc: "steals resources from enemies",
+            src: "grab_1",
+            length: 130,
+            width: 210,
+            xOff: -8,
+            yOff: 53,
+            dmg: 0,
+            Pdmg: 0,
+            steal: 250,
+            knock: 0.2,
+            spdMult: 1.05,
+            range: 125,
+            gather: 0,
+            speed: 700
+        }, {
+            id: 15,
+            type: 1,
+            age: 9,
+            pre: 12,
+            name: "musket",
+            desc: "slow firerate but high damage and range",
+            src: "musket_1",
+            req: ["stone", 10],
+            aboveHand: true,
+            rec: 0.35,
+            armS: 0.6,
+            hndS: 0.3,
+            hndD: 1.6,
+            length: 205,
+            width: 205,
+            xOff: 25,
+            yOff: 0,
+            Pdmg: 50,
+            projectile: 5,
+            hideProjectile: true,
+            spdMult: 0.6,
+            speed: 1500
+        }, {
+            Pdmg: 20
+        }, {
+            Pdmg: 35
+        }, {
+            Pdmg: 45
+        }];
+
+        const weaponVariants = [{
+            id: 0,
+            src: "",
+            xp: 0,
+            val: 1,
+        }, {
+            id: 1,
+            src: "_g",
+            xp: 3000,
+            val: 1.1,
+        }, {
+            id: 2,
+            src: "_d",
+            xp: 7000,
+            val: 1.18,
+        }, {
+            id: 3,
+            src: "_r",
+            poison: true,
+            xp: 12000,
+            val: 1.18,
+        }, {
+            id: 4,
+            src: "_e",
+            poison: true,
+            heal: true,
+            xp: 24000,
+            val: 1.18,
+        }];
+
+
+        const getEl = id => document.getElementById(id);
+
+        const my = {
+            hat: getEl("hat"),
+            primary: getEl("primary"),
+            primaryVariant: getEl("primary-variant"),
+            secondary: getEl("secondary"),
+            secondaryVariant: getEl("secondary-variant"),
+            turretGear: getEl("turretgear"),
+            spike: getEl("spike")
+        }
+
+        const enemy = {
+            hat: getEl("enemy-hat"),
+            primary: getEl("enemy-primary"),
+            primaryVariant: getEl("enemy-primary-variant")
+        }
+
+        const result = getEl("result");
+
+        function dmg(id, variant=0) {
+            if (id == 53 && enemy.hat.value == "emp") return 0;
+
+            const weapon = id == 53 ? {Pdmg: 25} : weapons[Number(id)]
+            let value = weapon.dmg || weapon.Pdmg;
+
+            if (weapon.dmg) {
+                if (my.hat.value == "bull") value *= 1.5;
+                else if (my.hat.value == "noob") value *= 1.2;
+                value *= weaponVariants[Number(variant)].val;
+            }
+
+            return enemy.hat.value == "solider" ? value*0.75 : value
+        }
+        
+        function update() {
+            let damage = 0;
+
+            if (my.primary.value != "none") {
+                damage = dmg(my.primary.value, my.primaryVariant.value);
+            }
+            if (my.secondary.value != "none") {
+                damage += dmg(my.secondary.value, my.secondaryVariant.value);
+            }
+            if (my.turretGear.checked) damage += dmg(53);
+            if (my.spike.value != "none") damage += dmg(Number(my.spike.value));
+
+            result.innerHTML = `Result: ${Math.round(damage)}`
+        }
+        update();
+
+        [
+            my.hat, my.primary, my.primaryVariant, my.secondary, my.secondaryVariant, my.turretGear, my.spike,
+            enemy.hat, enemy.primary, enemy.primaryVariant
+        ].forEach(thing => thing.addEventListener("change", update))
+    </script>
+</body>
+</html>
